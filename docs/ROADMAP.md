@@ -7,8 +7,8 @@ Each phase below is scoped, built, and reviewed independently — work stops aft
 ## Phase 0 — Roadmap & Scaffold ✅ (done)
 Repo structure, ASP.NET Core 10 Clean Architecture solution (Domain/Application/Infrastructure/WebApi + test projects), React 19 + Vite + TypeScript + Tailwind v4 + shadcn/ui frontend, JWT/Swagger/CORS wiring, health-check endpoint, git init. No business logic yet — solution builds, frontend runs, both verified end-to-end.
 
-## Phase 1 — Database Schema & Domain
-EF Core entities: Users/Roles (Master Admin / Admin / Executive), Leads, LeadTimeline (audit trail — who/when/old value/new value), Activities, Followups, Notes, Attachments, LeadSources, LeadStages, Company/Settings. Migrations against LocalDB. Indexes on Phone, Email, AssignedExecutiveId, Status, CreatedDate — the columns Filters/Search hit hardest.
+## Phase 1 — Database Schema & Domain ✅ (done)
+EF Core entities: Users/Roles (Master Admin / Admin / Executive), Leads, LeadTimeline (audit trail — who/when/old value/new value), Activities, Followups, Notes, Attachments, LeadSources, LeadStages, Countries/Cities, CompanyProfile, RefreshTokens. `InitialCreate` migration applied to LocalDB — 13 tables, 8 seeded default lead stages, indexes on Phone/Email/AssignedToUserId/LeadStageId/CreatedAtUtc/IsDeleted, optimistic concurrency (`RowVersion`) on Lead/User. No repositories, auth logic, or controllers yet.
 
 ## Phase 2 — Backend Core
 JWT auth (access + refresh tokens), role-based authorization policies, repository + unit-of-work pattern, FluentValidation pipeline, global exception handling, pagination/filtering/sorting conventions, an EF Core `SaveChanges` interceptor that auto-writes LeadTimeline entries (who/when/old/new) for every tracked change — this is what makes the audit trail automatic instead of something every feature has to remember to call.
