@@ -1,18 +1,42 @@
 using System.Text;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using SACRM.Application.Auth;
+using SACRM.Application.Common.Interfaces;
+using SACRM.Infrastructure.Auth;
 using SACRM.Infrastructure.Persistence;
+using SACRM.Infrastructure.Persistence.Interceptors;
+using SACRM.Infrastructure.Persistence.Repositories;
+using SACRM.WebApi.Filters;
+using SACRM.WebApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
 const string FrontendCorsPolicy = "FrontendCorsPolicy";
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options => options.Filters.Add<ValidationFilter>());
+builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 
-builder.Services.AddDbContext<SacrmDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<AuditableEntitySaveChangesInterceptor>();
+builder.Services.AddDbContext<SacrmDbContext>((sp, options) =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.AddInterceptors(sp.GetRequiredService<AuditableEntitySaveChangesInterceptor>());
+});
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -85,6 +109,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", "SACRM API v1"));
 }
 
+app.UseExceptionHandler();
+
 app.UseHttpsRedirection();
 
 app.UseCors(FrontendCorsPolicy);
@@ -93,6 +119,21 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+if (app.Environment.IsDevelopment())
+{
+    // Auto-migrate + seed only in Development. Production (Phase 6, IIS) runs migrations
+    // as an explicit deployment step instead of on every app start.
+    using var scope = app.Services.CreateScope();
+    var services = scope.ServiceProvider;
+    var dbContext = services.GetRequiredService<SacrmDbContext>();
+    await dbContext.Database.MigrateAsync();
+    await DbInitializer.SeedMasterAdminAsync(
+        dbContext,
+        services.GetRequiredService<IPasswordHasher>(),
+        services.GetRequiredService<IConfiguration>(),
+        services.GetRequiredService<ILogger<Program>>());
+}
 
 app.Run();
 

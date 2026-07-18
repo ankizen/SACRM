@@ -1,0 +1,3 @@
+namespace SACRM.Application.Common.Exceptions;
+
+public class InvalidCredentialsException(string message = "Invalid email or password.") : Exception(message);
