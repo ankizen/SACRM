@@ -1,0 +1,24 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Node (frontend has its own .gitignore too; this covers root-level tooling)
+node_modules/
+
+# Environment secrets (dev defaults like frontend/.env.development are intentionally committed)
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp

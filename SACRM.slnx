@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/backend/" />
+  <Folder Name="/backend/src/">
+    <Project Path="backend/src/SACRM.Application/SACRM.Application.csproj" />
+    <Project Path="backend/src/SACRM.Domain/SACRM.Domain.csproj" />
+    <Project Path="backend/src/SACRM.Infrastructure/SACRM.Infrastructure.csproj" />
+    <Project Path="backend/src/SACRM.WebApi/SACRM.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/backend/tests/">
+    <Project Path="backend/tests/SACRM.Application.Tests/SACRM.Application.Tests.csproj" />
+    <Project Path="backend/tests/SACRM.WebApi.Tests/SACRM.WebApi.Tests.csproj" />
+  </Folder>
+</Solution>

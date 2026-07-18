@@ -1,0 +1,6 @@
+@SACRM.WebApi_HostAddress = http://localhost:5024
+
+GET {{SACRM.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
