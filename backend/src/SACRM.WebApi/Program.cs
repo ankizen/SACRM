@@ -8,7 +8,9 @@ using Microsoft.OpenApi;
 using SACRM.Application.Attachments;
 using SACRM.Application.Auth;
 using SACRM.Application.Common.Interfaces;
+using SACRM.Application.Import;
 using SACRM.Infrastructure.Auth;
+using SACRM.Infrastructure.Import;
 using SACRM.Infrastructure.Persistence;
 using SACRM.Infrastructure.Persistence.Interceptors;
 using SACRM.Infrastructure.Persistence.Repositories;
@@ -39,6 +41,7 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IFileStorageService, LocalFileStorageService>();
+builder.Services.AddScoped<ILeadFileService, LeadFileService>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();

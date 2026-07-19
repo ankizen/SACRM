@@ -18,38 +18,8 @@ public class LeadsController(IUnitOfWork unitOfWork, ICurrentUserService current
     [HttpGet]
     public async Task<ActionResult<PagedResult<LeadListItemDto>>> List([FromQuery] LeadListQuery query, CancellationToken ct)
     {
-        var leads = unitOfWork.Repository<Lead>().Query().ApplyScope(currentUser);
-
-        leads = query.View switch
-        {
-            LeadView.Trash => leads.Where(l => l.IsDeleted),
-            LeadView.Duplicate => leads.Where(l => l.IsDuplicate && !l.IsDeleted),
-            LeadView.All => leads,
-            _ => leads.Where(l => !l.IsDeleted && !l.IsDuplicate)
-        };
-
-        if (query.LeadStageId is not null) leads = leads.Where(l => l.LeadStageId == query.LeadStageId);
-        if (query.LeadSourceId is not null) leads = leads.Where(l => l.LeadSourceId == query.LeadSourceId);
-        if (query.CityId is not null) leads = leads.Where(l => l.CityId == query.CityId);
-        if (query.CountryId is not null) leads = leads.Where(l => l.CountryId == query.CountryId);
-        if (query.Priority is not null) leads = leads.Where(l => l.Priority == query.Priority);
-        if (query.AssignedToUserId is not null) leads = leads.Where(l => l.AssignedToUserId == query.AssignedToUserId);
-        if (query.CreatedFrom is not null) leads = leads.Where(l => l.CreatedAtUtc >= query.CreatedFrom);
-        if (query.CreatedTo is not null) leads = leads.Where(l => l.CreatedAtUtc <= query.CreatedTo);
-
-        if (!string.IsNullOrWhiteSpace(query.Search))
-        {
-            var term = query.Search.Trim();
-            leads = leads.Where(l =>
-                l.Name.Contains(term) ||
-                l.Phone.Contains(term) ||
-                (l.Email != null && l.Email.Contains(term)) ||
-                (l.ShopName != null && l.ShopName.Contains(term)) ||
-                (l.GstNumber != null && l.GstNumber.Contains(term)) ||
-                (l.WhatsAppNumber != null && l.WhatsAppNumber.Contains(term)));
-        }
-
-        leads = leads.OrderByDescending(l => l.CreatedAtUtc);
+        var leads = unitOfWork.Repository<Lead>().Query().ApplyScope(currentUser).ApplyFilters(query)
+            .OrderByDescending(l => l.CreatedAtUtc);
 
         var result = await leads.ToListItemDtoQuery().ToPagedResultAsync(query.PageNumber, query.PageSize, ct);
         return Ok(result);
@@ -217,6 +187,38 @@ public class LeadsController(IUnitOfWork unitOfWork, ICurrentUserService current
         lead.IsDeleted = false;
         lead.DeletedAtUtc = null;
         lead.DeletedByUserId = null;
+        await unitOfWork.SaveChangesAsync(ct);
+        return NoContent();
+    }
+
+    [HttpPost("{id:int}/merge")]
+    [Authorize(Policy = "AdminOrAbove")]
+    public async Task<IActionResult> Merge(int id, MergeLeadRequest request, CancellationToken ct)
+    {
+        if (id == request.DuplicateLeadId)
+        {
+            throw new ConflictException("A lead cannot be merged into itself.");
+        }
+
+        var repo = unitOfWork.Repository<Lead>();
+        var canonicalExists = await repo.Query().AnyAsync(l => l.Id == id, ct);
+        if (!canonicalExists)
+        {
+            throw new NotFoundException(nameof(Lead), id);
+        }
+
+        var duplicate = await repo.Query().SingleOrDefaultAsync(l => l.Id == request.DuplicateLeadId, ct);
+        if (duplicate is null)
+        {
+            throw new NotFoundException(nameof(Lead), request.DuplicateLeadId);
+        }
+
+        duplicate.IsDuplicate = true;
+        duplicate.DuplicateOfLeadId = id;
+        duplicate.IsDeleted = true;
+        duplicate.DeletedAtUtc = DateTime.UtcNow;
+        duplicate.DeletedByUserId = currentUser.UserId;
+
         await unitOfWork.SaveChangesAsync(ct);
         return NoContent();
     }
