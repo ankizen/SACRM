@@ -60,6 +60,76 @@ public class AuditableEntitySaveChangesInterceptor(ICurrentUserService currentUs
         if (userId is not null)
         {
             WriteLeadTimelineEntries(context, utcNow, userId.Value);
+            WriteChildResourceTimelineEntries(context, utcNow, userId.Value);
+        }
+    }
+
+    private static void WriteChildResourceTimelineEntries(DbContext context, DateTime utcNow, int userId)
+    {
+        foreach (var entry in context.ChangeTracker.Entries<Activity>().Where(e => e.State == EntityState.Added).ToList())
+        {
+            context.Add(new LeadTimelineEntry
+            {
+                LeadId = entry.Entity.LeadId,
+                EventType = LeadTimelineEventType.ActivityLogged,
+                Description = $"{entry.Entity.Type}: {entry.Entity.Subject}",
+                PerformedByUserId = userId,
+                PerformedAtUtc = utcNow
+            });
+        }
+
+        foreach (var entry in context.ChangeTracker.Entries<Note>().Where(e => e.State == EntityState.Added).ToList())
+        {
+            context.Add(new LeadTimelineEntry
+            {
+                LeadId = entry.Entity.LeadId,
+                EventType = LeadTimelineEventType.NoteAdded,
+                Description = "Note added",
+                PerformedByUserId = userId,
+                PerformedAtUtc = utcNow
+            });
+        }
+
+        foreach (var entry in context.ChangeTracker.Entries<Attachment>().Where(e => e.State == EntityState.Added).ToList())
+        {
+            context.Add(new LeadTimelineEntry
+            {
+                LeadId = entry.Entity.LeadId,
+                EventType = LeadTimelineEventType.AttachmentAdded,
+                Description = $"Attachment added: {entry.Entity.FileName}",
+                PerformedByUserId = userId,
+                PerformedAtUtc = utcNow
+            });
+        }
+
+        foreach (var entry in context.ChangeTracker.Entries<Followup>().ToList())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                context.Add(new LeadTimelineEntry
+                {
+                    LeadId = entry.Entity.LeadId,
+                    EventType = LeadTimelineEventType.FollowupScheduled,
+                    Description = $"Followup scheduled for {entry.Entity.DueAtUtc:yyyy-MM-dd HH:mm} UTC",
+                    PerformedByUserId = userId,
+                    PerformedAtUtc = utcNow
+                });
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                var statusProperty = entry.Property(nameof(Followup.Status));
+                if (statusProperty.IsModified && entry.Entity.Status == FollowupStatus.Completed)
+                {
+                    context.Add(new LeadTimelineEntry
+                    {
+                        LeadId = entry.Entity.LeadId,
+                        EventType = LeadTimelineEventType.FollowupCompleted,
+                        Description = "Followup completed",
+                        PerformedByUserId = userId,
+                        PerformedAtUtc = utcNow
+                    });
+                }
+            }
         }
     }
 

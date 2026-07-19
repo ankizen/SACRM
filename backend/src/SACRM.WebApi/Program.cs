@@ -5,12 +5,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using SACRM.Application.Attachments;
 using SACRM.Application.Auth;
 using SACRM.Application.Common.Interfaces;
 using SACRM.Infrastructure.Auth;
 using SACRM.Infrastructure.Persistence;
 using SACRM.Infrastructure.Persistence.Interceptors;
 using SACRM.Infrastructure.Persistence.Repositories;
+using SACRM.Infrastructure.Storage;
 using SACRM.WebApi.Filters;
 using SACRM.WebApi.Middleware;
 
@@ -36,6 +38,7 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddSingleton<IFileStorageService, LocalFileStorageService>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();

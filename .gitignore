@@ -7,6 +7,9 @@ obj/
 *.userosscache
 *.sln.docstates
 
+# Uploaded attachments (local disk storage, dev-only data)
+backend/src/SACRM.WebApi/App_Data/
+
 # Node (frontend has its own .gitignore too; this covers root-level tooling)
 node_modules/
 
