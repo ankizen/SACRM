@@ -38,7 +38,7 @@ export function Topbar() {
   }
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+    <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur-sm">
       <SidebarTrigger />
       <Separator orientation="vertical" className="h-6" />
       <div className="flex-1" />
@@ -46,7 +46,9 @@ export function Topbar() {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="flex items-center gap-2 px-2">
             <Avatar className="size-7">
-              <AvatarFallback className="text-xs">{initials(user.fullName)}</AvatarFallback>
+              <AvatarFallback className="bg-primary/10 text-xs font-medium text-primary">
+                {initials(user.fullName)}
+              </AvatarFallback>
             </Avatar>
             <span className="hidden text-sm font-medium sm:inline">{user.fullName}</span>
             <Badge variant="secondary" className="hidden sm:inline-flex">
