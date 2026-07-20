@@ -74,13 +74,7 @@ export interface LeadFormValues {
   remarks?: string
 }
 
-export interface PagedResult<T> {
-  items: T[]
-  totalCount: number
-  pageNumber: number
-  pageSize: number
-  totalPages: number
-}
+export type { PagedResult } from "@/lib/types"
 
 export interface LeadListQuery {
   pageNumber?: number

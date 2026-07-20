@@ -28,6 +28,10 @@ import { PriorityBadge } from "@/components/shared/PriorityBadge"
 import { StageBadge } from "@/components/shared/StageBadge"
 import { useAuth } from "@/features/auth/AuthContext"
 import { useUsers } from "@/features/users/hooks"
+import { ActivitiesTab } from "@/features/activities/ActivitiesTab"
+import { NotesTab } from "@/features/notes/NotesTab"
+import { FollowupsTab } from "@/features/followups/FollowupsTab"
+import { AttachmentsTab } from "@/features/attachments/AttachmentsTab"
 import { useAssignLead, useDeleteLead, useLead, useLeadTimeline, useMergeLead, useRestoreLead } from "./hooks"
 
 function DetailRow({ label, value }: { label: string; value: string | null | undefined }) {
@@ -227,26 +231,22 @@ export function LeadDetailPage() {
               <TimelineTab leadId={leadId} />
             </TabsContent>
             <TabsContent value="activities">
-              <ComingSoonTab />
+              <ActivitiesTab leadId={leadId} />
             </TabsContent>
             <TabsContent value="notes">
-              <ComingSoonTab />
+              <NotesTab leadId={leadId} />
             </TabsContent>
             <TabsContent value="followups">
-              <ComingSoonTab />
+              <FollowupsTab leadId={leadId} />
             </TabsContent>
             <TabsContent value="attachments">
-              <ComingSoonTab />
+              <AttachmentsTab leadId={leadId} />
             </TabsContent>
           </Tabs>
         </div>
       </div>
     </div>
   )
-}
-
-function ComingSoonTab() {
-  return <p className="p-6 text-sm text-muted-foreground">This tab lands in the next update.</p>
 }
 
 function TimelineTab({ leadId }: { leadId: number }) {
