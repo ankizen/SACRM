@@ -9,11 +9,12 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useCities, useCountries, useLeadSources, useLeadStages } from "@/features/settings/lookups-hooks"
+import { useCountries, useLeadSources, useLeadStages } from "@/features/settings/lookups-hooks"
 import { useUsers } from "@/features/users/hooks"
 import { useAuth } from "@/features/auth/AuthContext"
 import { useDuplicateCheck } from "./hooks"
 import { leadFormSchema, type LeadFormSchema } from "./lead-schema"
+import { INDIA_STATES } from "./india-states"
 import type { LeadListItem } from "./types"
 
 interface LeadFormProps {
@@ -46,8 +47,10 @@ export function LeadForm({ defaultValues, onSubmit, isSubmitting, submitLabel, s
   const { data: sources } = useLeadSources()
   const { data: stages } = useLeadStages()
   const { data: countries } = useCountries()
-  const { data: cities } = useCities(countryId ? Number(countryId) : undefined)
   const { data: users } = useUsers(isAdminOrAbove)
+
+  const selectedCountryName = countries?.find((c) => String(c.id) === countryId)?.name
+  const isIndia = selectedCountryName === "India"
 
   const duplicateCheck = useDuplicateCheck()
   const [duplicates, setDuplicates] = useState<LeadListItem[]>([])
@@ -148,7 +151,7 @@ export function LeadForm({ defaultValues, onSubmit, isSubmitting, submitLabel, s
               value={watch("countryId") ?? NONE}
               onValueChange={(v) => {
                 setValue("countryId", v === NONE ? undefined : v)
-                setValue("cityId", undefined)
+                setValue("state", undefined)
               }}
             >
               <SelectTrigger>
@@ -165,28 +168,28 @@ export function LeadForm({ defaultValues, onSubmit, isSubmitting, submitLabel, s
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label>City</Label>
-            <Select
-              value={watch("cityId") ?? NONE}
-              onValueChange={(v) => setValue("cityId", v === NONE ? undefined : v)}
-              disabled={!countryId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select city" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NONE}>—</SelectItem>
-                {cities?.map((c) => (
-                  <SelectItem key={c.id} value={String(c.id)}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="city">City</Label>
+            <Input id="city" placeholder="Type a city" {...register("city")} />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="state">State</Label>
-            <Input id="state" {...register("state")} />
+            {isIndia ? (
+              <Select value={watch("state") ?? NONE} onValueChange={(v) => setValue("state", v === NONE ? undefined : v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select state" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>—</SelectItem>
+                  {INDIA_STATES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input id="state" placeholder="Select a country, or type a state" {...register("state")} />
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="zipCode">Zip Code</Label>

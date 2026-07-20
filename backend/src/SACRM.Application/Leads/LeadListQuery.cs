@@ -16,7 +16,6 @@ public class LeadListQuery : PagedRequest
     public string? Search { get; set; }
     public int? LeadStageId { get; set; }
     public int? LeadSourceId { get; set; }
-    public int? CityId { get; set; }
     public int? CountryId { get; set; }
     public LeadPriority? Priority { get; set; }
     public int? AssignedToUserId { get; set; }

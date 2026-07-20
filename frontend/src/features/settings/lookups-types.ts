@@ -20,14 +20,6 @@ export interface Country {
   isActive: boolean
 }
 
-export interface City {
-  id: number
-  name: string
-  isActive: boolean
-  countryId: number
-  countryName: string
-}
-
 export interface LeadSourceUpsertRequest {
   name: string
   isActive: boolean
@@ -45,10 +37,4 @@ export interface LeadStageUpsertRequest {
 export interface CountryUpsertRequest {
   name: string
   isActive: boolean
-}
-
-export interface CityUpsertRequest {
-  name: string
-  isActive: boolean
-  countryId: number
 }

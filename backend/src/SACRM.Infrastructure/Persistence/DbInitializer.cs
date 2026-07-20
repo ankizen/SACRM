@@ -49,10 +49,10 @@ public static class DbInitializer
     }
 
     /// <summary>
-    /// Starter Lead Sources and a Country/City list, so a fresh deployment's Lead form
-    /// and filters aren't empty dropdowns on day one. Each table is seeded independently
-    /// ("only if empty") so re-running after an admin has customized one list doesn't
-    /// touch it, and doesn't block seeding the others.
+    /// Starter Lead Sources and a Country, so a fresh deployment's Lead form and filters
+    /// aren't empty dropdowns on day one. Each table is seeded independently ("only if
+    /// empty") so re-running after an admin has customized one list doesn't touch it, and
+    /// doesn't block seeding the others.
     /// </summary>
     public static async Task SeedLookupsAsync(SacrmDbContext context, ILogger logger, CancellationToken cancellationToken = default)
     {
@@ -70,18 +70,9 @@ public static class DbInitializer
 
         if (!await context.Countries.AnyAsync(cancellationToken))
         {
-            var india = new Country { Name = "India", IsActive = true };
-            context.Countries.Add(india);
+            context.Countries.Add(new Country { Name = "India", IsActive = true });
             await context.SaveChangesAsync(cancellationToken);
-
-            string[] cities = ["Mumbai", "Delhi", "Bengaluru", "Pune", "Hyderabad", "Chennai", "Kolkata", "Ahmedabad"];
-            foreach (var city in cities)
-            {
-                context.Cities.Add(new City { Name = city, IsActive = true, CountryId = india.Id });
-            }
-
-            await context.SaveChangesAsync(cancellationToken);
-            logger.LogInformation("Seeded India and {Count} starter cities.", cities.Length);
+            logger.LogInformation("Seeded India as a starter country.");
         }
     }
 }

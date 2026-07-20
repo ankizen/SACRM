@@ -1,7 +1,5 @@
 import { api } from "@/lib/api"
 import type {
-  City,
-  CityUpsertRequest,
   Country,
   CountryUpsertRequest,
   LeadSource,
@@ -29,9 +27,4 @@ export const lookupsApi = {
   createCountry: (values: CountryUpsertRequest) => api.post<Country>("/countries", values).then((r) => r.data),
   updateCountry: (id: number, values: CountryUpsertRequest) =>
     api.put(`/countries/${id}`, values).then(() => undefined),
-
-  cities: (countryId?: number, includeInactive = false) =>
-    api.get<City[]>("/cities", { params: { countryId, includeInactive } }).then((r) => r.data),
-  createCity: (values: CityUpsertRequest) => api.post<City>("/cities", values).then((r) => r.data),
-  updateCity: (id: number, values: CityUpsertRequest) => api.put(`/cities/${id}`, values).then(() => undefined),
 }

@@ -305,7 +305,7 @@ export function LeadListPage() {
                   <div className="text-sm text-muted-foreground">{lead.phone}</div>
                 </TableCell>
                 <TableCell>{lead.shopName ?? "—"}</TableCell>
-                <TableCell>{lead.cityName ?? "—"}</TableCell>
+                <TableCell>{lead.city ?? "—"}</TableCell>
                 <TableCell>
                   <StageBadge name={lead.leadStageName} />
                 </TableCell>

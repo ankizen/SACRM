@@ -16,7 +16,7 @@ function toFormDefaults(lead: Lead): Partial<LeadFormSchema> {
     email: lead.email ?? "",
     shopName: lead.shopName ?? "",
     address: lead.address ?? "",
-    cityId: lead.cityId ? String(lead.cityId) : undefined,
+    city: lead.city ?? "",
     state: lead.state ?? "",
     zipCode: lead.zipCode ?? "",
     countryId: lead.countryId ? String(lead.countryId) : undefined,

@@ -135,7 +135,7 @@ public class LeadImportExportController(IUnitOfWork unitOfWork, ICurrentUserServ
                 Phone = l.Phone,
                 Email = l.Email,
                 ShopName = l.ShopName,
-                City = l.City != null ? l.City.Name : null,
+                City = l.City,
                 State = l.State,
                 Country = l.Country != null ? l.Country.Name : null,
                 LeadSource = l.LeadSource != null ? l.LeadSource.Name : null,

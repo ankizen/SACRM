@@ -7,7 +7,7 @@ export interface LeadListItem {
   phone: string
   email: string | null
   shopName: string | null
-  cityName: string | null
+  city: string | null
   leadStageId: number
   leadStageName: string
   leadSourceName: string | null
@@ -28,8 +28,7 @@ export interface Lead {
   email: string | null
   shopName: string | null
   address: string | null
-  cityId: number | null
-  cityName: string | null
+  city: string | null
   state: string | null
   zipCode: string | null
   countryId: number | null
@@ -61,7 +60,7 @@ export interface LeadFormValues {
   email?: string
   shopName?: string
   address?: string
-  cityId?: number
+  city?: string
   state?: string
   zipCode?: string
   countryId?: number
@@ -82,7 +81,6 @@ export interface LeadListQuery {
   search?: string
   leadStageId?: number
   leadSourceId?: number
-  cityId?: number
   countryId?: number
   priority?: LeadPriority
   assignedToUserId?: number

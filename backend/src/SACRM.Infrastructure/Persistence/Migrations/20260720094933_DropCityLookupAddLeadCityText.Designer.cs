@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SACRM.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using SACRM.Infrastructure.Persistence;
 namespace SACRM.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(SacrmDbContext))]
-    partial class SacrmDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260720094933_DropCityLookupAddLeadCityText")]
+    partial class DropCityLookupAddLeadCityText
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

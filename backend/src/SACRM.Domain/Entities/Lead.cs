@@ -13,8 +13,7 @@ public class Lead : AuditableEntity
     public string? ShopName { get; set; }
     public string? Address { get; set; }
 
-    public int? CityId { get; set; }
-    public City? City { get; set; }
+    public string? City { get; set; }
     public string? State { get; set; }
     public string? ZipCode { get; set; }
     public int? CountryId { get; set; }

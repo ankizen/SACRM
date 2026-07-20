@@ -204,7 +204,7 @@ export function LeadDetailPage() {
             <DetailRow label="Alternate Phone" value={lead.alternatePhone} />
             <DetailRow label="Shop Name" value={lead.shopName} />
             <DetailRow label="Address" value={lead.address} />
-            <DetailRow label="City" value={lead.cityName} />
+            <DetailRow label="City" value={lead.city} />
             <DetailRow label="State" value={lead.state} />
             <DetailRow label="Country" value={lead.countryName} />
             <DetailRow label="Zip Code" value={lead.zipCode} />

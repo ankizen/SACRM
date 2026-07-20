@@ -14,6 +14,7 @@ public class LeadConfiguration : IEntityTypeConfiguration<Lead>
         builder.Property(l => l.AlternatePhone).HasMaxLength(20);
         builder.Property(l => l.Email).HasMaxLength(256);
         builder.Property(l => l.ShopName).HasMaxLength(200);
+        builder.Property(l => l.City).HasMaxLength(200);
         builder.Property(l => l.State).HasMaxLength(100);
         builder.Property(l => l.ZipCode).HasMaxLength(20);
         builder.Property(l => l.GstNumber).HasMaxLength(15);
@@ -36,11 +37,6 @@ public class LeadConfiguration : IEntityTypeConfiguration<Lead>
         builder.HasOne(l => l.LeadSource)
             .WithMany()
             .HasForeignKey(l => l.LeadSourceId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(l => l.City)
-            .WithMany()
-            .HasForeignKey(l => l.CityId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(l => l.Country)

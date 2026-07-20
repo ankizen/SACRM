@@ -21,7 +21,6 @@ public static class LeadListQueryExtensions
 
         if (query.LeadStageId is not null) leads = leads.Where(l => l.LeadStageId == query.LeadStageId);
         if (query.LeadSourceId is not null) leads = leads.Where(l => l.LeadSourceId == query.LeadSourceId);
-        if (query.CityId is not null) leads = leads.Where(l => l.CityId == query.CityId);
         if (query.CountryId is not null) leads = leads.Where(l => l.CountryId == query.CountryId);
         if (query.Priority is not null) leads = leads.Where(l => l.Priority == query.Priority);
         if (query.AssignedToUserId is not null) leads = leads.Where(l => l.AssignedToUserId == query.AssignedToUserId);

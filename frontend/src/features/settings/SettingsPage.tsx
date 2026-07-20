@@ -2,7 +2,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { LeadSourcesSettings } from "./LeadSourcesSettings"
 import { LeadStagesSettings } from "./LeadStagesSettings"
 import { CountriesSettings } from "./CountriesSettings"
-import { CitiesSettings } from "./CitiesSettings"
 import { CompanyProfileSettings } from "./CompanyProfileSettings"
 
 export function SettingsPage() {
@@ -17,7 +16,6 @@ export function SettingsPage() {
           <TabsTrigger value="stages">Lead Stages</TabsTrigger>
           <TabsTrigger value="sources">Lead Sources</TabsTrigger>
           <TabsTrigger value="countries">Countries</TabsTrigger>
-          <TabsTrigger value="cities">Cities</TabsTrigger>
         </TabsList>
 
         <TabsContent value="company">
@@ -31,9 +29,6 @@ export function SettingsPage() {
         </TabsContent>
         <TabsContent value="countries">
           <CountriesSettings />
-        </TabsContent>
-        <TabsContent value="cities">
-          <CitiesSettings />
         </TabsContent>
       </Tabs>
     </div>

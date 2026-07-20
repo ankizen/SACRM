@@ -24,6 +24,7 @@ export const SUPPORTED_FIELDS = [
   "Email",
   "ShopName",
   "Address",
+  "City",
   "State",
   "ZipCode",
   "GstNumber",

@@ -7,7 +7,7 @@ public class LeadListItemDto
     public string Phone { get; set; } = string.Empty;
     public string? Email { get; set; }
     public string? ShopName { get; set; }
-    public string? CityName { get; set; }
+    public string? City { get; set; }
     public int LeadStageId { get; set; }
     public string LeadStageName { get; set; } = string.Empty;
     public string? LeadSourceName { get; set; }

@@ -91,7 +91,7 @@ public class LeadsController(IUnitOfWork unitOfWork, ICurrentUserService current
             Email = request.Email,
             ShopName = request.ShopName,
             Address = request.Address,
-            CityId = request.CityId,
+            City = request.City,
             State = request.State,
             ZipCode = request.ZipCode,
             CountryId = request.CountryId,
@@ -137,7 +137,7 @@ public class LeadsController(IUnitOfWork unitOfWork, ICurrentUserService current
         lead.Email = request.Email;
         lead.ShopName = request.ShopName;
         lead.Address = request.Address;
-        lead.CityId = request.CityId;
+        lead.City = request.City;
         lead.State = request.State;
         lead.ZipCode = request.ZipCode;
         lead.CountryId = request.CountryId;

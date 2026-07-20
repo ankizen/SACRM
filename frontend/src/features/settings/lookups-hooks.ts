@@ -1,11 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { lookupsApi } from "./lookups-api"
-import type {
-  CityUpsertRequest,
-  CountryUpsertRequest,
-  LeadSourceUpsertRequest,
-  LeadStageUpsertRequest,
-} from "./lookups-types"
+import type { CountryUpsertRequest, LeadSourceUpsertRequest, LeadStageUpsertRequest } from "./lookups-types"
 
 // Dropdowns (Lead form/filters) default to active-only; the Settings management
 // screens pass includeInactive=true so admins can see and reactivate retired entries.
@@ -28,13 +23,6 @@ export function useCountries(includeInactive = false) {
   return useQuery({
     queryKey: ["countries", includeInactive],
     queryFn: () => lookupsApi.countries(includeInactive),
-  })
-}
-
-export function useCities(countryId?: number, includeInactive = false) {
-  return useQuery({
-    queryKey: ["cities", countryId, includeInactive],
-    queryFn: () => lookupsApi.cities(countryId, includeInactive),
   })
 }
 
@@ -62,14 +50,5 @@ export function useSaveCountry() {
     mutationFn: ({ id, values }: { id?: number; values: CountryUpsertRequest }) =>
       id ? lookupsApi.updateCountry(id, values) : lookupsApi.createCountry(values),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["countries"] }),
-  })
-}
-
-export function useSaveCity() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, values }: { id?: number; values: CityUpsertRequest }) =>
-      id ? lookupsApi.updateCity(id, values) : lookupsApi.createCity(values),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cities"] }),
   })
 }

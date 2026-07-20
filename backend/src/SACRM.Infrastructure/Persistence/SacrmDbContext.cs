@@ -8,7 +8,6 @@ public class SacrmDbContext(DbContextOptions<SacrmDbContext> options) : DbContex
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Country> Countries => Set<Country>();
-    public DbSet<City> Cities => Set<City>();
     public DbSet<LeadSource> LeadSources => Set<LeadSource>();
     public DbSet<LeadStage> LeadStages => Set<LeadStage>();
     public DbSet<Lead> Leads => Set<Lead>();
