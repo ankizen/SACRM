@@ -1,12 +1,21 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useLocation, useNavigate } from "react-router-dom"
+import { toast } from "sonner"
+import { isAxiosError } from "axios"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { loginSchema, type LoginFormValues } from "./login-schema"
+import { useAuth } from "./AuthContext"
 
 export function LoginPage() {
+  const { login } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const from = (location.state as { from?: Location })?.from?.pathname ?? "/dashboard"
+
   const {
     register,
     handleSubmit,
@@ -14,8 +23,16 @@ export function LoginPage() {
   } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema) })
 
   const onSubmit = handleSubmit(async (values) => {
-    // Wired up to POST /api/auth/login once Phase 2 (Backend Core / JWT auth) lands.
-    console.log("login submit", values)
+    try {
+      await login(values.email, values.password)
+      navigate(from, { replace: true })
+    } catch (error) {
+      const message =
+        isAxiosError(error) && error.response?.status === 401
+          ? "Invalid email or password."
+          : "Something went wrong. Please try again."
+      toast.error(message)
+    }
   })
 
   return (
@@ -38,7 +55,7 @@ export function LoginPage() {
               {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             </div>
             <Button type="submit" disabled={isSubmitting} className="mt-2">
-              Sign in
+              {isSubmitting ? "Signing in..." : "Sign in"}
             </Button>
           </form>
         </CardContent>
