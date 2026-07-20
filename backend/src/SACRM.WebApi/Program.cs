@@ -18,6 +18,7 @@ using SACRM.Infrastructure.Persistence.Repositories;
 using SACRM.Infrastructure.Storage;
 using SACRM.WebApi.Filters;
 using SACRM.WebApi.Middleware;
+using SACRM.WebApi.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,7 +89,11 @@ const string StatusPageHtml = """
     """;
 
 builder.Services.AddControllers(options => options.Filters.Add<ValidationFilter>())
-    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
+    });
 builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 
 builder.Services.AddHttpContextAccessor();
