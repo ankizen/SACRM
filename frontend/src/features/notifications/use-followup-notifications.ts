@@ -53,10 +53,16 @@ function fireNotification(followup: Followup, thresholdMin: number, navigate: Na
   })
 
   if (typeof Notification !== "undefined" && Notification.permission === "granted") {
-    const notification = new Notification("Followup reminder", { body: message });
-    notification.onclick = () => {
+    const notification = new Notification("Followup reminder", { body: message })
+    // A raw DOM Notification click isn't inside React Router's context, and background/inactive
+    // tabs can be frozen by the browser -- window.location.href is a hard navigation that works
+    // unconditionally (React Router deep-links /leads/:id correctly on load), instead of relying
+    // on the SPA's navigate() firing correctly from an event source outside the page's normal
+    // interaction flow.
+    notification.onclick = (event) => {
+      event.preventDefault()
       window.focus()
-      navigate(`/leads/${followup.leadId}`)
+      window.location.href = `/leads/${followup.leadId}`
       notification.close()
     }
   }

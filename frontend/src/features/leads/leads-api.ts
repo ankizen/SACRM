@@ -18,6 +18,8 @@ export const leadsApi = {
 
   assign: (id: number, assignedToUserId: number) => api.post(`/leads/${id}/assign`, { assignedToUserId }),
 
+  changeStage: (id: number, leadStageId: number) => api.post(`/leads/${id}/change-stage`, { leadStageId }),
+
   bulkUpdate: (leadIds: number[], patch: { leadStageId?: number; assignedToUserId?: number }) =>
     api.post("/leads/bulk-update", { leadIds, ...patch }),
 

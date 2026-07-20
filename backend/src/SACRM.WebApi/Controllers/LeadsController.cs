@@ -254,6 +254,36 @@ public class LeadsController(IUnitOfWork unitOfWork, ICurrentUserService current
         return NoContent();
     }
 
+    /// <summary>
+    /// Lightweight single-field update for the Pipeline board's drag-and-drop -- unlike
+    /// bulk-update (Admin+ only) this is scoped like everything else Executives can already
+    /// touch on their own leads, and unlike the full Update endpoint it doesn't need the whole
+    /// LeadUpdateRequest payload/RowVersion just to move a card between columns. The audit
+    /// interceptor still auto-logs the StageChanged timeline entry since this is a normal
+    /// tracked-entity save.
+    /// </summary>
+    [HttpPost("{id:int}/change-stage")]
+    public async Task<IActionResult> ChangeStage(int id, ChangeLeadStageRequest request, CancellationToken ct)
+    {
+        var lead = await unitOfWork.Repository<Lead>().Query().ApplyScope(currentUser)
+            .SingleOrDefaultAsync(l => l.Id == id, ct);
+        if (lead is null)
+        {
+            throw new NotFoundException(nameof(Lead), id);
+        }
+
+        var stageExists = await unitOfWork.Repository<LeadStage>().Query()
+            .AnyAsync(s => s.Id == request.LeadStageId, ct);
+        if (!stageExists)
+        {
+            throw new NotFoundException(nameof(LeadStage), request.LeadStageId);
+        }
+
+        lead.LeadStageId = request.LeadStageId;
+        await unitOfWork.SaveChangesAsync(ct);
+        return NoContent();
+    }
+
     [HttpGet("{id:int}/timeline")]
     public async Task<ActionResult<PagedResult<LeadTimelineEntryDto>>> Timeline(
         int id, [FromQuery] PagedRequest paging, CancellationToken ct)
