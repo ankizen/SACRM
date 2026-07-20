@@ -23,6 +23,70 @@ var builder = WebApplication.CreateBuilder(args);
 
 const string FrontendCorsPolicy = "FrontendCorsPolicy";
 
+const string StatusPageHtml = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SACRM API</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(180deg, #eaf1fb 0%, #f7f9fd 100%);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      .card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 20px 50px -20px rgba(30, 41, 59, 0.25);
+        padding: 48px 56px;
+        text-align: center;
+        max-width: 420px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #16a34a;
+        margin-bottom: 20px;
+      }
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: #22c55e;
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 28px;
+        color: #0f172a;
+      }
+      p {
+        margin: 0;
+        color: #64748b;
+        font-size: 15px;
+        line-height: 1.5;
+      }
+    </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="badge"><span class="dot"></span>API is online</div>
+        <h1>SACRM API is Running</h1>
+        <p>The backend service is online and accepting requests.</p>
+      </div>
+    </body>
+    </html>
+    """;
+
 builder.Services.AddControllers(options => options.Filters.Add<ValidationFilter>())
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
@@ -121,7 +185,7 @@ var forwardedHeaderOptions = new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 };
-forwardedHeaderOptions.KnownNetworks.Clear();
+forwardedHeaderOptions.KnownIPNetworks.Clear();
 forwardedHeaderOptions.KnownProxies.Clear();
 app.UseForwardedHeaders(forwardedHeaderOptions);
 
@@ -139,6 +203,11 @@ app.UseCors(FrontendCorsPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// A friendly status page at the bare domain root -- with only MapControllers() mapped,
+// visiting https://api.crm.swarnapp.com/ directly in a browser 404'd with nothing useful.
+// This is just a static confirmation page; /api/health remains the real machine-readable check.
+app.MapGet("/", () => Results.Content(StatusPageHtml, "text/html"));
 
 app.MapControllers();
 
