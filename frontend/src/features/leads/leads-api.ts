@@ -28,4 +28,7 @@ export const leadsApi = {
 
   timeline: (id: number, paging: { pageNumber?: number; pageSize?: number }) =>
     api.get<PagedResult<LeadTimelineEntry>>(`/leads/${id}/timeline`, { params: paging }).then((r) => r.data),
+
+  export: (query: LeadListQuery, format: "xlsx" | "csv") =>
+    api.get(`/leads/export`, { params: { ...query, format }, responseType: "blob" }),
 }

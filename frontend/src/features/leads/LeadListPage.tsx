@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
-import { Plus, Search } from "lucide-react"
+import { toast } from "sonner"
+import { Download, Plus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -19,8 +20,10 @@ import { StageBadge } from "@/components/shared/StageBadge"
 import { useAuth } from "@/features/auth/AuthContext"
 import { useLeadStages } from "@/features/settings/lookups-hooks"
 import { useUsers } from "@/features/users/hooks"
+import { ImportLeadsDialog } from "@/features/import/ImportLeadsDialog"
 import { useBulkUpdateLeads, useLeads } from "./hooks"
-import type { LeadPriority, LeadView } from "./types"
+import { leadsApi } from "./leads-api"
+import type { LeadListQuery, LeadPriority, LeadView } from "./types"
 
 const VIEW_TABS: { value: LeadView; label: string }[] = [
   { value: "Active", label: "Active" },
@@ -70,7 +73,7 @@ export function LeadListPage() {
     setSearchParams(next)
   }
 
-  const { data, isLoading } = useLeads({
+  const currentQuery: LeadListQuery = {
     pageNumber,
     pageSize: 20,
     view,
@@ -78,7 +81,29 @@ export function LeadListPage() {
     leadStageId,
     priority,
     assignedToUserId,
-  })
+  }
+
+  const { data, isLoading } = useLeads(currentQuery)
+
+  const [isExporting, setIsExporting] = useState(false)
+  const handleExport = async (format: "xlsx" | "csv") => {
+    setIsExporting(true)
+    try {
+      const response = await leadsApi.export(currentQuery, format)
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement("a")
+      link.href = url
+      link.download = `leads.${format}`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch {
+      toast.error("Could not export leads.")
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   const { data: stages } = useLeadStages()
   const { data: users } = useUsers(isAdminOrAbove)
@@ -101,12 +126,23 @@ export function LeadListPage() {
           <h1 className="text-2xl font-semibold tracking-tight">Leads</h1>
           <p className="text-muted-foreground">Manage your sales pipeline.</p>
         </div>
-        <Button asChild>
-          <Link to="/leads/new">
-            <Plus />
-            New Lead
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          {isAdminOrAbove && (
+            <>
+              <ImportLeadsDialog />
+              <Button variant="outline" onClick={() => handleExport("xlsx")} disabled={isExporting}>
+                <Download />
+                Export
+              </Button>
+            </>
+          )}
+          <Button asChild>
+            <Link to="/leads/new">
+              <Plus />
+              New Lead
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Tabs value={view} onValueChange={(v) => updateParams({ view: v, page: null })} className="mt-6">

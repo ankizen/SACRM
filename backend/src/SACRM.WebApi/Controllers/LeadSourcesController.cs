@@ -34,6 +34,12 @@ public class LeadSourcesController(IUnitOfWork unitOfWork) : ControllerBase
     [Authorize(Policy = "AdminOrAbove")]
     public async Task<ActionResult<LeadSourceDto>> Create(LeadSourceUpsertRequest request, CancellationToken ct)
     {
+        var nameTaken = await unitOfWork.Repository<LeadSource>().Query().AnyAsync(s => s.Name == request.Name, ct);
+        if (nameTaken)
+        {
+            throw new ConflictException($"A lead source named '{request.Name}' already exists.");
+        }
+
         var entity = new LeadSource { Name = request.Name, IsActive = request.IsActive, SortOrder = request.SortOrder };
         await unitOfWork.Repository<LeadSource>().AddAsync(entity, ct);
         await unitOfWork.SaveChangesAsync(ct);
@@ -50,6 +56,13 @@ public class LeadSourcesController(IUnitOfWork unitOfWork) : ControllerBase
         if (entity is null)
         {
             throw new NotFoundException(nameof(LeadSource), id);
+        }
+
+        var nameTaken = await unitOfWork.Repository<LeadSource>().Query()
+            .AnyAsync(s => s.Name == request.Name && s.Id != id, ct);
+        if (nameTaken)
+        {
+            throw new ConflictException($"A lead source named '{request.Name}' already exists.");
         }
 
         entity.Name = request.Name;

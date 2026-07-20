@@ -42,6 +42,12 @@ public class LeadStagesController(IUnitOfWork unitOfWork) : ControllerBase
     [Authorize(Policy = "AdminOrAbove")]
     public async Task<ActionResult<LeadStageDto>> Create(LeadStageUpsertRequest request, CancellationToken ct)
     {
+        var nameTaken = await unitOfWork.Repository<LeadStage>().Query().AnyAsync(s => s.Name == request.Name, ct);
+        if (nameTaken)
+        {
+            throw new ConflictException($"A lead stage named '{request.Name}' already exists.");
+        }
+
         var entity = new LeadStage
         {
             Name = request.Name,
@@ -72,6 +78,13 @@ public class LeadStagesController(IUnitOfWork unitOfWork) : ControllerBase
         if (entity is null)
         {
             throw new NotFoundException(nameof(LeadStage), id);
+        }
+
+        var nameTaken = await unitOfWork.Repository<LeadStage>().Query()
+            .AnyAsync(s => s.Name == request.Name && s.Id != id, ct);
+        if (nameTaken)
+        {
+            throw new ConflictException($"A lead stage named '{request.Name}' already exists.");
         }
 
         entity.Name = request.Name;

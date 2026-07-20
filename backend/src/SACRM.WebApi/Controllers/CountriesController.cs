@@ -34,6 +34,12 @@ public class CountriesController(IUnitOfWork unitOfWork) : ControllerBase
     [Authorize(Policy = "AdminOrAbove")]
     public async Task<ActionResult<CountryDto>> Create(CountryUpsertRequest request, CancellationToken ct)
     {
+        var nameTaken = await unitOfWork.Repository<Country>().Query().AnyAsync(c => c.Name == request.Name, ct);
+        if (nameTaken)
+        {
+            throw new ConflictException($"A country named '{request.Name}' already exists.");
+        }
+
         var entity = new Country { Name = request.Name, IsActive = request.IsActive };
         await unitOfWork.Repository<Country>().AddAsync(entity, ct);
         await unitOfWork.SaveChangesAsync(ct);
@@ -49,6 +55,13 @@ public class CountriesController(IUnitOfWork unitOfWork) : ControllerBase
         if (entity is null)
         {
             throw new NotFoundException(nameof(Country), id);
+        }
+
+        var nameTaken = await unitOfWork.Repository<Country>().Query()
+            .AnyAsync(c => c.Name == request.Name && c.Id != id, ct);
+        if (nameTaken)
+        {
+            throw new ConflictException($"A country named '{request.Name}' already exists.");
         }
 
         entity.Name = request.Name;

@@ -5,7 +5,9 @@ import { LeadListPage } from "@/features/leads/LeadListPage"
 import { LeadCreatePage } from "@/features/leads/LeadCreatePage"
 import { LeadEditPage } from "@/features/leads/LeadEditPage"
 import { LeadDetailPage } from "@/features/leads/LeadDetailPage"
-import { ComingSoonPage } from "@/features/shared/ComingSoonPage"
+import { ReportsPage } from "@/features/reports/ReportsPage"
+import { SettingsPage } from "@/features/settings/SettingsPage"
+import { UsersPage } from "@/features/users/UsersPage"
 import { ProtectedRoute } from "@/components/routing/ProtectedRoute"
 import { RoleGuard } from "@/components/routing/RoleGuard"
 import { AppShell } from "@/components/layout/AppShell"
@@ -27,9 +29,9 @@ const router = createBrowserRouter([
           {
             element: <RoleGuard allowedRoles={["MasterAdmin", "Admin"]} />,
             children: [
-              { path: "/reports", element: <ComingSoonPage title="Reports" /> },
-              { path: "/settings", element: <ComingSoonPage title="Settings" /> },
-              { path: "/users", element: <ComingSoonPage title="Users" /> },
+              { path: "/reports", element: <ReportsPage /> },
+              { path: "/settings", element: <SettingsPage /> },
+              { path: "/users", element: <UsersPage /> },
             ],
           },
         ],

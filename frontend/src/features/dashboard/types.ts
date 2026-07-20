@@ -13,3 +13,12 @@ export interface DashboardSummary {
   pendingFollowups: number
   leadSourceBreakdown: LeadSourceBreakdownItem[]
 }
+
+export interface ExecutivePerformance {
+  userId: number
+  userName: string
+  totalLeads: number
+  convertedLeads: number
+  lostLeads: number
+  conversionRatePercent: number
+}
