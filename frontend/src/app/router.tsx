@@ -1,6 +1,10 @@
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom"
 import { LoginPage } from "@/features/auth/LoginPage"
 import { DashboardPage } from "@/features/dashboard/DashboardPage"
+import { LeadListPage } from "@/features/leads/LeadListPage"
+import { LeadCreatePage } from "@/features/leads/LeadCreatePage"
+import { LeadEditPage } from "@/features/leads/LeadEditPage"
+import { LeadDetailPage } from "@/features/leads/LeadDetailPage"
 import { ComingSoonPage } from "@/features/shared/ComingSoonPage"
 import { ProtectedRoute } from "@/components/routing/ProtectedRoute"
 import { RoleGuard } from "@/components/routing/RoleGuard"
@@ -16,7 +20,10 @@ const router = createBrowserRouter([
         element: <AppShell />,
         children: [
           { path: "/dashboard", element: <DashboardPage /> },
-          { path: "/leads", element: <ComingSoonPage title="Leads" /> },
+          { path: "/leads", element: <LeadListPage /> },
+          { path: "/leads/new", element: <LeadCreatePage /> },
+          { path: "/leads/:id", element: <LeadDetailPage /> },
+          { path: "/leads/:id/edit", element: <LeadEditPage /> },
           {
             element: <RoleGuard allowedRoles={["MasterAdmin", "Admin"]} />,
             children: [

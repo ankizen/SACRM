@@ -29,8 +29,16 @@ Verified end-to-end with a Playwright driver against both live servers: unauthen
 
 Two bugs found and fixed during verification: (1) `SidebarMenuButton`'s `tooltip` prop needs a `TooltipProvider` ancestor — the shadcn CLI's own install output had warned about this and it was missed; added in `AppShell`. (2) The bigger one — TanStack Query's `QueryClient` is a singleton for the app's lifetime, and without clearing it on login/logout, switching users in the same tab kept serving the *previous* user's cached dashboard numbers until they went stale (up to 30s) — Rahul's dashboard was silently showing the Master Admin's org-wide counts instead of his own scoped ones. Fixed with `queryClient.clear()` in both `login()` and `logout()`. Worth remembering for Phase 5: any cross-cutting client-side cache needs an explicit story for "the logged-in user changed."
 
-## Phase 5 — Frontend Feature Screens
-Dashboard, Lead list (server-side filters/search/pagination), Lead detail (timeline/activities/notes/attachments), Import/Export UI, Reports, Settings, User management (role-gated).
+## Phase 5 — Frontend Feature Screens (in progress — 5a done; 5b/5c next)
+Dashboard, Lead list (server-side filters/search/pagination), Lead detail (timeline/activities/notes/attachments), Import/Export UI, Reports, Settings, User management (role-gated). Ships as three checkpoints like Phase 3:
+
+- **5a ✅ — Leads core.** Lead list (`/leads`) with server-side search/stage/priority/assigned-to filters and view tabs (Active/Duplicate/Trash) synced to the URL via `useSearchParams`, bulk-select + bulk stage update (Admin+), a shared `LeadForm` (RHF + Zod) reused by `/leads/new` and `/leads/:id/edit` with a live duplicate-check on phone/email/GST blur, and `/leads/:id` detail with Assign/Delete/Restore/Merge actions (Admin+ gated) plus a working Timeline tab. Activities/Notes/Followups/Attachments tabs are stubbed for 5b. No `@tanstack/react-table` — filtering/sorting/pagination stay server-side (Phase 3a already owns that), the frontend just renders controlled inputs against the existing `<Table>`.
+
+  Verified end-to-end with the same Playwright-driver approach as Phase 4 (no chromium-cli available): create → duplicate warning → save → Timeline shows Created, stage/priority edit → Timeline shows the change, assign → Timeline shows Assigned, delete → appears in Trash → restore, and an Executive session that only sees its own assigned leads with Assign/Delete/bulk controls not rendered and a 404 on someone else's lead ID typed directly into the URL.
+
+  Also surfaced (not a bug, a behavior worth knowing): logging out from a specific page and back in redirects to *that* page again, not always `/dashboard` — the Phase 4 "return to originally-requested route" feature applies to every login, not just the unauthenticated-redirect case. The first version of the 5a test script assumed a hard-coded `/dashboard` landing and had to be corrected; no app change needed.
+- **5b — Lead detail sub-resources.** Wire the Activities/Notes/Followups/Attachments tabs to Phase 3b's endpoints.
+- **5c — Everything else.** Import/Export UI, Settings (lookup CRUD + CompanyProfile), Users management, Reports screens, richer Dashboard.
 
 ## Phase 6 — Polish & Deploy Prep
 Responsiveness pass, IIS deployment config (`web.config`, hosting bundle notes), Vercel config for the frontend preview, seed data script, smoke test checklist.
