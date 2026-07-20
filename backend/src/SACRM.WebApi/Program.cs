@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -111,6 +112,19 @@ builder.Services.AddAuthorizationBuilder()
 
 var app = builder.Build();
 
+// Behind a reverse proxy that terminates TLS (IIS/ARR, or Traefik in front of the
+// Docker/Coolify deploy) the app only ever sees plain HTTP internally -- without this,
+// UseHttpsRedirection below can't tell the original request was HTTPS and would try to
+// redirect it again. KnownNetworks/KnownProxies are cleared because the proxy's IP isn't
+// fixed/known in advance in a container setup.
+var forwardedHeaderOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+forwardedHeaderOptions.KnownNetworks.Clear();
+forwardedHeaderOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedHeaderOptions);
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -130,11 +144,33 @@ app.MapControllers();
 
 if (app.Environment.IsDevelopment())
 {
-    // Auto-migrate only in Development. Production (see docs/DEPLOYMENT.md) runs
-    // `dotnet ef database update` as an explicit deployment step instead of on every
-    // app start/app-pool recycle.
+    // Auto-migrate only in Development. A "real" production deploy (see docs/DEPLOYMENT.md)
+    // runs `dotnet ef database update` as an explicit step instead of on every app start.
     using var migrationScope = app.Services.CreateScope();
     await migrationScope.ServiceProvider.GetRequiredService<SacrmDbContext>().Database.MigrateAsync();
+}
+else if (app.Configuration.GetValue<bool>("RunMigrationsOnStartup"))
+{
+    // Opt-in for containerized/Coolify deploys (see docs/DOCKER.md), which redeploy from a
+    // fresh image often -- an explicit deploy step isn't practical there the way it is for a
+    // long-lived IIS server. Retries because the bundled SQL Server container can still be
+    // initializing when this container starts; without a retry this would just crash-loop.
+    using var migrationScope = app.Services.CreateScope();
+    var db = migrationScope.ServiceProvider.GetRequiredService<SacrmDbContext>();
+    var migrationLogger = migrationScope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    for (var attempt = 1; ; attempt++)
+    {
+        try
+        {
+            await db.Database.MigrateAsync();
+            break;
+        }
+        catch (Exception ex) when (attempt < 10)
+        {
+            migrationLogger.LogWarning(ex, "Startup migration attempt {Attempt} failed, retrying in 5s...", attempt);
+            await Task.Delay(TimeSpan.FromSeconds(5));
+        }
+    }
 }
 
 // Seeding runs in every environment -- each step is a no-op once its table has data,

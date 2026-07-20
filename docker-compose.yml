@@ -1,0 +1,49 @@
+# Self-contained backend stack (API + SQL Server) for iterating on Coolify while the
+# CRM is still being built out. Frontend stays on Vercel (see frontend/vercel.json) --
+# it's a static build with no server-side runtime, so it doesn't need a container.
+#
+# Usage: copy .env.example to .env, fill in real values, then `docker compose up -d`.
+# See docs/DOCKER.md for the Coolify-specific deployment notes.
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    # Not exposed to the host/public network by default -- only the `api` service
+    # needs to reach it, over the compose-internal network.
+    expose:
+      - "1433"
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - sqlserver
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      # SQL Server can take longer to accept connections than the API takes to boot,
+      # especially on first container start -- Program.cs retries the startup
+      # migration a few times instead of crash-looping the whole container.
+      RunMigrationsOnStartup: "true"
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=SACRM;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true"
+      Jwt__Key: ${JWT_KEY}
+      Jwt__Issuer: SACRM
+      Jwt__Audience: SACRM.Client
+      Cors__AllowedOrigins__0: ${FRONTEND_URL}
+      Seed__MasterAdminEmail: ${SEED_MASTER_ADMIN_EMAIL}
+      Seed__MasterAdminPassword: ${SEED_MASTER_ADMIN_PASSWORD}
+    ports:
+      - "8080:8080"
+    volumes:
+      - api-uploads:/app/App_Data/uploads
+
+volumes:
+  sqlserver-data:
+  api-uploads:
