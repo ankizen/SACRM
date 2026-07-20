@@ -38,7 +38,7 @@ function DetailRow({ label, value }: { label: string; value: string | null | und
   return (
     <div className="grid grid-cols-3 gap-2 py-1.5 text-sm">
       <span className="text-muted-foreground">{label}</span>
-      <span className="col-span-2">{value || "—"}</span>
+      <span className="col-span-2 break-words">{value || "—"}</span>
     </div>
   )
 }
@@ -217,9 +217,9 @@ export function LeadDetailPage() {
           </CardContent>
         </Card>
 
-        <div className="lg:col-span-2">
+        <div className="min-w-0 lg:col-span-2">
           <Tabs defaultValue="timeline">
-            <TabsList>
+            <TabsList className="max-w-full justify-start overflow-x-auto">
               <TabsTrigger value="timeline">Timeline</TabsTrigger>
               <TabsTrigger value="activities">Activities</TabsTrigger>
               <TabsTrigger value="notes">Notes</TabsTrigger>

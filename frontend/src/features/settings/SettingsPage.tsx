@@ -12,7 +12,7 @@ export function SettingsPage() {
       <p className="text-muted-foreground">Configure lookups and company details.</p>
 
       <Tabs defaultValue="company" className="mt-6">
-        <TabsList>
+        <TabsList className="max-w-full justify-start overflow-x-auto">
           <TabsTrigger value="company">Company</TabsTrigger>
           <TabsTrigger value="stages">Lead Stages</TabsTrigger>
           <TabsTrigger value="sources">Lead Sources</TabsTrigger>

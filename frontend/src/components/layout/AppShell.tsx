@@ -9,9 +9,9 @@ export function AppShell() {
     <TooltipProvider>
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset>
+        <SidebarInset className="min-w-0">
           <Topbar />
-          <main className="flex-1 overflow-auto">
+          <main className="min-w-0 flex-1 overflow-auto">
             <Outlet />
           </main>
         </SidebarInset>

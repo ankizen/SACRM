@@ -130,17 +130,27 @@ app.MapControllers();
 
 if (app.Environment.IsDevelopment())
 {
-    // Auto-migrate + seed only in Development. Production (Phase 6, IIS) runs migrations
-    // as an explicit deployment step instead of on every app start.
-    using var scope = app.Services.CreateScope();
-    var services = scope.ServiceProvider;
+    // Auto-migrate only in Development. Production (see docs/DEPLOYMENT.md) runs
+    // `dotnet ef database update` as an explicit deployment step instead of on every
+    // app start/app-pool recycle.
+    using var migrationScope = app.Services.CreateScope();
+    await migrationScope.ServiceProvider.GetRequiredService<SacrmDbContext>().Database.MigrateAsync();
+}
+
+// Seeding runs in every environment -- each step is a no-op once its table has data,
+// and it's what lets a fresh production deployment log in at all (there's no self-registration
+// endpoint by design; Admins/Executives are only ever created by a Master Admin). This assumes
+// migrations have already been applied -- see the deployment ordering in docs/DEPLOYMENT.md.
+using (var seedScope = app.Services.CreateScope())
+{
+    var services = seedScope.ServiceProvider;
     var dbContext = services.GetRequiredService<SacrmDbContext>();
-    await dbContext.Database.MigrateAsync();
     await DbInitializer.SeedMasterAdminAsync(
         dbContext,
         services.GetRequiredService<IPasswordHasher>(),
         services.GetRequiredService<IConfiguration>(),
         services.GetRequiredService<ILogger<Program>>());
+    await DbInitializer.SeedLookupsAsync(dbContext, services.GetRequiredService<ILogger<Program>>());
 }
 
 app.Run();

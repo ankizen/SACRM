@@ -50,8 +50,18 @@ Dashboard, Lead list (server-side filters/search/pagination), Lead detail (timel
 
 This completes Phase 5 (Frontend Feature Screens). Phase 6 (Polish & Deploy Prep) is next.
 
-## Phase 6 — Polish & Deploy Prep
-Responsiveness pass, IIS deployment config (`web.config`, hosting bundle notes), Vercel config for the frontend preview, seed data script, smoke test checklist.
+## Phase 6 — Polish & Deploy Prep ✅ (done)
+IIS deployment config (`web.config` — ANCM V2 in-process hosting, `appsettings.Production.json.example` template), `frontend/vercel.json` (SPA rewrite so deep-linked/refreshed routes don't 404), starter seed data (`DbInitializer.SeedLookupsAsync` — 6 Lead Sources, India + 8 cities), `docs/DEPLOYMENT.md`, and `docs/SMOKE_TEST.md`. No live IIS/Vercel access in this session, so deployment artifacts were verified for correctness wherever locally testable (build success, config file syntax, seed idempotency, SPA routing behavior) rather than an end-to-end live deploy.
+
+Found and fixed during this phase:
+1. **Real production bootstrap gap**: `DbInitializer`'s seeding (Master Admin + lookups) only ran inside the `if (app.Environment.IsDevelopment())` block in `Program.cs`. Since SACRM has no self-registration endpoint by design, a production deployment would have had no way to create the first login-capable account. Fixed by splitting the block: `Database.MigrateAsync()` stays Development-only (production migrations are now an explicit `dotnet ef database update` deployment step, documented in `docs/DEPLOYMENT.md`), while the seed calls now run in every environment (each is a no-op once its table has data — verified by simulating `ASPNETCORE_ENVIRONMENT=Production` against a freshly-migrated temp LocalDB database: migration correctly did not re-run, seeding correctly populated the Master Admin + lookups on first start and was a clean no-op on the second).
+2. **`web.config` was invalid XML**: the trailing comment used a literal `--` inside the comment body, which XML forbids. Caught by validating with PowerShell's `[xml]` cast — silently would have failed IIS's config parser on deploy. Fixed by rewording the comment.
+3. **Lead list table overflow at tablet width (768px)**: found via a Playwright viewport audit (375/768/1280px across Login/Dashboard/Lead list/Lead detail/Settings). Root cause was the classic CSS flex/grid "min-width: auto" trap — `SidebarInset`/`main` (and later, the Lead detail page's `lg:col-span-2` grid item) had no `min-w-0`, so their default `min-width: auto` let them grow to fit their widest descendant instead of respecting the available track/flex-basis width, which defeated the table's own `overflow-x-auto` and pushed the whole layout wider than the viewport. Fixed with `min-w-0` on `AppShell`'s `SidebarInset`/`main` and the Lead detail page's tab-panel grid item.
+4. **Toolbar buttons and tab strips clipped off-screen on mobile (375px)**: the Lead list header's Import/Export/New Lead button row, and both the Settings and Lead-detail `TabsList` strips (5 tabs each), had no wrap or scroll handling — at 375px the last item(s) rendered past the viewport edge with no way to reach them. Fixed the button row with `flex-wrap`, and both tab strips with `overflow-x-auto` so they scroll horizontally within their own contained strip (same pattern the Lead table already used) instead of silently clipping content.
+
+Verified end-to-end: Playwright drove the full smoke-test critical path (unauthenticated `/login`, Master Admin login → dashboard, session persists across reload, deep-linking directly to `/leads` works, logout) against the local dev stack, and a fresh temp LocalDB database confirmed the corrected seed-in-Production behavior and idempotency described above.
+
+This completes all six roadmap phases. SACRM's core CRM (spec'd modules, roles, audit trail, deployment artifacts) is done; see "Future (not scheduled)" below for what's intentionally out of scope for now.
 
 ## Future (not scheduled)
 WhatsApp Cloud API, Email integration, Google Calendar, n8n webhooks, Quotation/Invoice module, PWA/offline, Dark mode, full Audit Log UI, Webhooks/public API.

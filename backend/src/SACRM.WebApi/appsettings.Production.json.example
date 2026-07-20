@@ -1,0 +1,19 @@
+{
+  "_comment": "Copy this to appsettings.Production.json on the server (or set these as IIS environment variables / app pool settings) and fill in real values. This file is a template only -- never commit real secrets. See docs/DEPLOYMENT.md.",
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=YOUR_SQL_SERVER;Database=SACRM;User Id=YOUR_USER;Password=YOUR_PASSWORD;TrustServerCertificate=True;MultipleActiveResultSets=true"
+  },
+  "Jwt": {
+    "Issuer": "SACRM",
+    "Audience": "SACRM.Client",
+    "Key": "REPLACE_WITH_A_LONG_RANDOM_SECRET_AT_LEAST_32_CHARACTERS",
+    "AccessTokenMinutes": 15,
+    "RefreshTokenDays": 7
+  },
+  "Cors": {
+    "AllowedOrigins": [ "https://your-frontend.vercel.app" ]
+  },
+  "Storage": {
+    "UploadsPath": "App_Data/uploads"
+  }
+}
