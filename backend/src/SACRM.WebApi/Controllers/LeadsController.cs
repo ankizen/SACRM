@@ -82,6 +82,15 @@ public class LeadsController(IUnitOfWork unitOfWork, ICurrentUserService current
     {
         var stageId = request.LeadStageId ?? await GetDefaultFreshStageIdAsync(ct);
 
+        // Executives never see the "Assigned To" field (LeadForm hides it for them), so
+        // request.AssignedToUserId is always null for them -- without this, a lead an
+        // Executive just created would be immediately invisible to them: LeadAccessScope
+        // only lets Executives see leads assigned to themselves, and an unassigned lead
+        // would 404 forever, even to its own creator.
+        var assignedToUserId = currentUser.Role == nameof(SACRM.Domain.Enums.UserRole.Executive)
+            ? currentUser.UserId
+            : request.AssignedToUserId;
+
         var lead = new Lead
         {
             Name = request.Name,
@@ -99,7 +108,7 @@ public class LeadsController(IUnitOfWork unitOfWork, ICurrentUserService current
             Website = request.Website,
             LeadSourceId = request.LeadSourceId,
             LeadStageId = stageId,
-            AssignedToUserId = request.AssignedToUserId,
+            AssignedToUserId = assignedToUserId,
             Priority = request.Priority,
             Remarks = request.Remarks
         };

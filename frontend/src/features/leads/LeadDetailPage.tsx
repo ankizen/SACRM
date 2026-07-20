@@ -49,7 +49,7 @@ export function LeadDetailPage() {
   const { user } = useAuth()
   const isAdminOrAbove = user?.role === "MasterAdmin" || user?.role === "Admin"
 
-  const { data: lead, isLoading } = useLead(leadId)
+  const { data: lead, isLoading, isError } = useLead(leadId)
   const { data: users } = useUsers(isAdminOrAbove)
   const assignLead = useAssignLead()
   const deleteLead = useDeleteLead()
@@ -58,6 +58,22 @@ export function LeadDetailPage() {
 
   const [mergeDialogOpen, setMergeDialogOpen] = useState(false)
   const [duplicateLeadId, setDuplicateLeadId] = useState("")
+
+  if (isError) {
+    return (
+      <div className="p-6">
+        <Button variant="ghost" size="sm" asChild className="mb-2 -ml-2">
+          <Link to="/leads">
+            <ArrowLeft />
+            Back to Leads
+          </Link>
+        </Button>
+        <p className="text-muted-foreground">
+          This lead doesn't exist, or you don't have access to it.
+        </p>
+      </div>
+    )
+  }
 
   if (isLoading || !lead) {
     return (
