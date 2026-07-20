@@ -14,4 +14,6 @@ export const followupsApi = {
   today: () => api.get<Followup[]>("/followups/today").then((r) => r.data),
 
   pending: () => api.get<Followup[]>("/followups/pending").then((r) => r.data),
+
+  upcoming: () => api.get<Followup[]>("/followups/upcoming").then((r) => r.data),
 }

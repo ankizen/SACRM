@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SACRM.Application.Common;
 using SACRM.Application.Common.Interfaces;
 using SACRM.Application.Dashboard;
 using SACRM.Application.Leads;
@@ -17,8 +18,10 @@ public class DashboardController(IUnitOfWork unitOfWork, ICurrentUserService cur
     [HttpGet("summary")]
     public async Task<ActionResult<DashboardSummaryDto>> Summary(CancellationToken ct)
     {
-        var todayStart = DateTime.UtcNow.Date;
-        var todayEnd = todayStart.AddDays(1);
+        var timezone = await unitOfWork.Repository<CompanyProfile>().Query()
+            .Select(p => p.Timezone)
+            .FirstOrDefaultAsync(ct);
+        var (todayStart, todayEnd) = CompanyClock.GetTodayRangeUtc(timezone);
 
         var leads = unitOfWork.Repository<Lead>().Query().ApplyScope(currentUser).Where(l => !l.IsDeleted && !l.IsDuplicate);
 

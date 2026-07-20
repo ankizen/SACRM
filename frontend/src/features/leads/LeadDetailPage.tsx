@@ -27,6 +27,7 @@ import { Label } from "@/components/ui/label"
 import { PriorityBadge } from "@/components/shared/PriorityBadge"
 import { StageBadge } from "@/components/shared/StageBadge"
 import { useAuth } from "@/features/auth/AuthContext"
+import { useFormatDate } from "@/lib/use-format-date"
 import { useUsers } from "@/features/users/hooks"
 import { ActivitiesTab } from "@/features/activities/ActivitiesTab"
 import { NotesTab } from "@/features/notes/NotesTab"
@@ -51,6 +52,7 @@ export function LeadDetailPage() {
 
   const { data: lead, isLoading, isError } = useLead(leadId)
   const { data: users } = useUsers(isAdminOrAbove)
+  const { formatDateTime } = useFormatDate()
   const assignLead = useAssignLead()
   const deleteLead = useDeleteLead()
   const restoreLead = useRestoreLead()
@@ -229,7 +231,7 @@ export function LeadDetailPage() {
             <DetailRow label="Source" value={lead.leadSourceName} />
             <DetailRow label="Assigned To" value={lead.assignedToUserName ?? "Unassigned"} />
             <DetailRow label="Remarks" value={lead.remarks} />
-            <DetailRow label="Created" value={new Date(lead.createdAtUtc).toLocaleString()} />
+            <DetailRow label="Created" value={formatDateTime(lead.createdAtUtc)} />
           </CardContent>
         </Card>
 
@@ -267,6 +269,7 @@ export function LeadDetailPage() {
 
 function TimelineTab({ leadId }: { leadId: number }) {
   const { data, isLoading } = useLeadTimeline(leadId)
+  const { formatDateTime } = useFormatDate()
 
   if (isLoading) {
     return <Skeleton className="h-40 w-full" />
@@ -287,7 +290,7 @@ function TimelineTab({ leadId }: { leadId: number }) {
             </p>
           )}
           <p className="text-xs text-muted-foreground">
-            {entry.performedByUserName} · {new Date(entry.performedAtUtc).toLocaleString()}
+            {entry.performedByUserName} · {formatDateTime(entry.performedAtUtc)}
           </p>
         </li>
       ))}

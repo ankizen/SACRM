@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useFormatDate } from "@/lib/use-format-date"
 import { useAttachments, useDeleteAttachment, useUploadAttachment } from "./hooks"
 import { attachmentsApi } from "./attachments-api"
 import { ATTACHMENT_CATEGORIES, type Attachment, type AttachmentCategory } from "./types"
@@ -31,6 +32,7 @@ export function AttachmentsTab({ leadId }: { leadId: number }) {
   const { data, isLoading } = useAttachments(leadId)
   const uploadAttachment = useUploadAttachment(leadId)
   const deleteAttachment = useDeleteAttachment(leadId)
+  const { formatDate } = useFormatDate()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [category, setCategory] = useState<AttachmentCategory>("Document")
@@ -103,7 +105,7 @@ export function AttachmentsTab({ leadId }: { leadId: number }) {
                 <p className="text-sm font-medium">{attachment.fileName}</p>
                 <p className="text-xs text-muted-foreground">
                   {formatBytes(attachment.sizeBytes)} · {attachment.uploadedByUserName} ·{" "}
-                  {new Date(attachment.uploadedAtUtc).toLocaleDateString()}
+                  {formatDate(attachment.uploadedAtUtc)}
                 </p>
               </div>
               <Badge variant="outline">{attachment.category}</Badge>

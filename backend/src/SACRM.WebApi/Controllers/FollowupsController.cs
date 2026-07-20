@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SACRM.Application.Common;
 using SACRM.Application.Common.Exceptions;
 using SACRM.Application.Common.Interfaces;
 using SACRM.Application.Common.Models;
@@ -78,8 +79,10 @@ public class FollowupsController(IUnitOfWork unitOfWork, ICurrentUserService cur
     [HttpGet("~/api/followups/today")]
     public async Task<ActionResult<List<FollowupDto>>> Today(CancellationToken ct)
     {
-        var todayStart = DateTime.UtcNow.Date;
-        var todayEnd = todayStart.AddDays(1);
+        var timezone = await UnitOfWork.Repository<CompanyProfile>().Query()
+            .Select(p => p.Timezone)
+            .FirstOrDefaultAsync(ct);
+        var (todayStart, todayEnd) = CompanyClock.GetTodayRangeUtc(timezone);
 
         var query = ApplyExecutiveScope(UnitOfWork.Repository<Followup>().Query()
             .Where(f => f.Status == FollowupStatus.Pending && f.DueAtUtc >= todayStart && f.DueAtUtc < todayEnd));
@@ -94,6 +97,22 @@ public class FollowupsController(IUnitOfWork unitOfWork, ICurrentUserService cur
         var now = DateTime.UtcNow;
         var query = ApplyExecutiveScope(UnitOfWork.Repository<Followup>().Query()
             .Where(f => f.Status == FollowupStatus.Pending && f.DueAtUtc < now));
+
+        var result = await query.OrderBy(f => f.DueAtUtc).ToDtoQuery().ToListAsync(ct);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Pending followups due in the next 15 minutes -- polled client-side to drive the
+    /// 10/5/1-minute-before browser notifications (see useFollowupNotifications on the frontend).
+    /// </summary>
+    [HttpGet("~/api/followups/upcoming")]
+    public async Task<ActionResult<List<FollowupDto>>> Upcoming(CancellationToken ct)
+    {
+        var now = DateTime.UtcNow;
+        var horizon = now.AddMinutes(15);
+        var query = ApplyExecutiveScope(UnitOfWork.Repository<Followup>().Query()
+            .Where(f => f.Status == FollowupStatus.Pending && f.DueAtUtc >= now && f.DueAtUtc <= horizon));
 
         var result = await query.OrderBy(f => f.DueAtUtc).ToDtoQuery().ToListAsync(ct);
         return Ok(result);

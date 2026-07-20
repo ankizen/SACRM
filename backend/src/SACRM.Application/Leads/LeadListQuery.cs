@@ -21,5 +21,7 @@ public class LeadListQuery : PagedRequest
     public int? AssignedToUserId { get; set; }
     public DateTime? CreatedFrom { get; set; }
     public DateTime? CreatedTo { get; set; }
+    public bool? WonStage { get; set; }
+    public bool? LostStage { get; set; }
     public LeadView View { get; set; } = LeadView.Active;
 }

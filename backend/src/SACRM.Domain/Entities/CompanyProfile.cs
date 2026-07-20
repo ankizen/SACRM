@@ -10,6 +10,7 @@ public class CompanyProfile
     public string? Website { get; set; }
     public string? GstNumber { get; set; }
     public string? LogoUrl { get; set; }
+    public string Timezone { get; set; } = "Asia/Kolkata";
 
     public DateTime? UpdatedAtUtc { get; set; }
     public int? UpdatedByUserId { get; set; }

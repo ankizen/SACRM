@@ -6,11 +6,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useFormatDate } from "@/lib/use-format-date"
 import { useActivities, useCreateActivity } from "./hooks"
 import { ACTIVITY_TYPES, type ActivityType } from "./types"
 
 export function ActivitiesTab({ leadId }: { leadId: number }) {
   const { data, isLoading } = useActivities(leadId)
+  const { formatDateTime } = useFormatDate()
   const createActivity = useCreateActivity(leadId)
 
   const [type, setType] = useState<ActivityType>("PhoneCall")
@@ -83,7 +85,7 @@ export function ActivitiesTab({ leadId }: { leadId: number }) {
                 {activity.type} — {activity.subject}
               </span>
               <span className="text-xs text-muted-foreground">
-                {new Date(activity.occurredAtUtc).toLocaleString()}
+                {formatDateTime(activity.occurredAtUtc)}
               </span>
             </div>
             {activity.description && <p className="mt-1 text-sm text-muted-foreground">{activity.description}</p>}

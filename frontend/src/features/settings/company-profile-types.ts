@@ -7,6 +7,7 @@ export interface CompanyProfile {
   website: string | null
   gstNumber: string | null
   logoUrl: string | null
+  timezone: string
   updatedAtUtc: string | null
 }
 
@@ -18,4 +19,5 @@ export interface CompanyProfileUpsertRequest {
   website?: string
   gstNumber?: string
   logoUrl?: string
+  timezone: string
 }

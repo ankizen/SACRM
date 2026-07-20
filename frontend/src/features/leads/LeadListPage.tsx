@@ -17,7 +17,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton"
 import { PriorityBadge } from "@/components/shared/PriorityBadge"
 import { StageBadge } from "@/components/shared/StageBadge"
+import { EmptyState } from "@/components/shared/EmptyState"
 import { useAuth } from "@/features/auth/AuthContext"
+import { useFormatDate } from "@/lib/use-format-date"
 import { useLeadStages } from "@/features/settings/lookups-hooks"
 import { useUsers } from "@/features/users/hooks"
 import { ImportLeadsDialog } from "@/features/import/ImportLeadsDialog"
@@ -40,13 +42,19 @@ export function LeadListPage() {
   const isAdminOrAbove = user?.role === "MasterAdmin" || user?.role === "Admin"
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { formatDate } = useFormatDate()
 
   const view = (searchParams.get("view") as LeadView) ?? "Active"
   const pageNumber = Number(searchParams.get("page") ?? "1")
   const leadStageId = searchParams.get("stage") ? Number(searchParams.get("stage")) : undefined
+  const leadSourceId = searchParams.get("source") ? Number(searchParams.get("source")) : undefined
   const priority = (searchParams.get("priority") as LeadPriority) || undefined
   const assignedToUserId = searchParams.get("assignedTo") ? Number(searchParams.get("assignedTo")) : undefined
   const search = searchParams.get("search") ?? ""
+  const createdFrom = searchParams.get("createdFrom") ?? undefined
+  const createdTo = searchParams.get("createdTo") ?? undefined
+  const wonStage = searchParams.get("wonStage") === "true" ? true : undefined
+  const lostStage = searchParams.get("lostStage") === "true" ? true : undefined
 
   const [searchInput, setSearchInput] = useState(search)
   useEffect(() => setSearchInput(search), [search])
@@ -79,8 +87,13 @@ export function LeadListPage() {
     view,
     search: search || undefined,
     leadStageId,
+    leadSourceId,
     priority,
     assignedToUserId,
+    createdFrom,
+    createdTo,
+    wonStage,
+    lostStage,
   }
 
   const { data, isLoading } = useLeads(currentQuery)
@@ -279,8 +292,8 @@ export function LeadListPage() {
 
             {!isLoading && data?.items.length === 0 && (
               <TableRow>
-                <TableCell colSpan={isAdminOrAbove ? 9 : 8} className="py-10 text-center text-muted-foreground">
-                  No leads found.
+                <TableCell colSpan={isAdminOrAbove ? 9 : 8}>
+                  <EmptyState title="No leads found" description="Try adjusting your filters, or add a new lead." />
                 </TableCell>
               </TableRow>
             )}
@@ -315,7 +328,7 @@ export function LeadListPage() {
                   <PriorityBadge priority={lead.priority} />
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
-                  {new Date(lead.createdAtUtc).toLocaleDateString()}
+                  {formatDate(lead.createdAtUtc)}
                 </TableCell>
               </TableRow>
             ))}

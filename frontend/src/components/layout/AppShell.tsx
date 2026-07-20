@@ -1,10 +1,13 @@
 import { Outlet } from "react-router-dom"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { useFollowupNotifications } from "@/features/notifications/use-followup-notifications"
 import { AppSidebar } from "./AppSidebar"
 import { Topbar } from "./Topbar"
 
 export function AppShell() {
+  useFollowupNotifications()
+
   return (
     <TooltipProvider>
       <SidebarProvider>

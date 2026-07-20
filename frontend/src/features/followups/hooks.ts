@@ -10,6 +10,22 @@ export function useFollowups(leadId: number) {
   })
 }
 
+export function useTodaysFollowups() {
+  return useQuery({ queryKey: ["followups", "today"], queryFn: followupsApi.today })
+}
+
+export function usePendingFollowups() {
+  return useQuery({ queryKey: ["followups", "pending"], queryFn: followupsApi.pending })
+}
+
+export function useUpcomingFollowups(options?: { refetchInterval?: number }) {
+  return useQuery({
+    queryKey: ["followups", "upcoming"],
+    queryFn: followupsApi.upcoming,
+    refetchInterval: options?.refetchInterval,
+  })
+}
+
 export function useCreateFollowup(leadId: number) {
   const queryClient = useQueryClient()
   return useMutation({

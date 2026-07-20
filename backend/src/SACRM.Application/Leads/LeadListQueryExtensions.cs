@@ -26,6 +26,8 @@ public static class LeadListQueryExtensions
         if (query.AssignedToUserId is not null) leads = leads.Where(l => l.AssignedToUserId == query.AssignedToUserId);
         if (query.CreatedFrom is not null) leads = leads.Where(l => l.CreatedAtUtc >= query.CreatedFrom);
         if (query.CreatedTo is not null) leads = leads.Where(l => l.CreatedAtUtc <= query.CreatedTo);
+        if (query.WonStage == true) leads = leads.Where(l => l.LeadStage.IsWonStage);
+        if (query.LostStage == true) leads = leads.Where(l => l.LeadStage.IsLostStage);
 
         if (!string.IsNullOrWhiteSpace(query.Search))
         {

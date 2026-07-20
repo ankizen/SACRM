@@ -85,6 +85,10 @@ export interface LeadListQuery {
   priority?: LeadPriority
   assignedToUserId?: number
   view?: LeadView
+  createdFrom?: string
+  createdTo?: string
+  wonStage?: boolean
+  lostStage?: boolean
 }
 
 export interface LeadTimelineEntry {

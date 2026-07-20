@@ -5,6 +5,7 @@ import { LeadListPage } from "@/features/leads/LeadListPage"
 import { LeadCreatePage } from "@/features/leads/LeadCreatePage"
 import { LeadEditPage } from "@/features/leads/LeadEditPage"
 import { LeadDetailPage } from "@/features/leads/LeadDetailPage"
+import { FollowupsPage } from "@/features/followups/FollowupsPage"
 import { ReportsPage } from "@/features/reports/ReportsPage"
 import { SettingsPage } from "@/features/settings/SettingsPage"
 import { UsersPage } from "@/features/users/UsersPage"
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
           { path: "/leads/new", element: <LeadCreatePage /> },
           { path: "/leads/:id", element: <LeadDetailPage /> },
           { path: "/leads/:id/edit", element: <LeadEditPage /> },
+          { path: "/followups", element: <FollowupsPage /> },
           {
             element: <RoleGuard allowedRoles={["MasterAdmin", "Admin"]} />,
             children: [

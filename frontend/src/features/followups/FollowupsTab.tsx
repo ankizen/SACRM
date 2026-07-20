@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useFormatDate } from "@/lib/use-format-date"
 import { useCreateFollowup, useFollowups, useUpdateFollowup } from "./hooks"
 import type { FollowupStatus } from "./types"
 
@@ -23,6 +24,7 @@ export function FollowupsTab({ leadId }: { leadId: number }) {
   const { data, isLoading } = useFollowups(leadId)
   const createFollowup = useCreateFollowup(leadId)
   const updateFollowup = useUpdateFollowup(leadId)
+  const { formatDateTime } = useFormatDate()
 
   const [dueAt, setDueAt] = useState("")
   const [notes, setNotes] = useState("")
@@ -74,7 +76,7 @@ export function FollowupsTab({ leadId }: { leadId: number }) {
           <li key={followup.id} className="rounded-md border p-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">{new Date(followup.dueAtUtc).toLocaleString()}</span>
+                <span className="text-sm font-medium">{formatDateTime(followup.dueAtUtc)}</span>
                 <Badge variant={STATUS_VARIANT[followup.status]}>{followup.status}</Badge>
               </div>
               <Select

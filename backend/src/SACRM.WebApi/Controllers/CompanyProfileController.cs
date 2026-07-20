@@ -42,6 +42,7 @@ public class CompanyProfileController(IUnitOfWork unitOfWork) : ControllerBase
         profile.Website = request.Website;
         profile.GstNumber = request.GstNumber;
         profile.LogoUrl = request.LogoUrl;
+        profile.Timezone = request.Timezone;
         profile.UpdatedAtUtc = DateTime.UtcNow;
 
         await unitOfWork.SaveChangesAsync(ct);
@@ -59,6 +60,7 @@ public class CompanyProfileController(IUnitOfWork unitOfWork) : ControllerBase
         Website = c.Website,
         GstNumber = c.GstNumber,
         LogoUrl = c.LogoUrl,
+        Timezone = c.Timezone,
         UpdatedAtUtc = c.UpdatedAtUtc
     };
 }

@@ -4,12 +4,14 @@ import { Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useFormatDate } from "@/lib/use-format-date"
 import { useCreateNote, useDeleteNote, useNotes, useUpdateNote } from "./hooks"
 import type { Note } from "./types"
 
 function NoteItem({ note, leadId }: { note: Note; leadId: number }) {
   const updateNote = useUpdateNote(leadId)
   const deleteNote = useDeleteNote(leadId)
+  const { formatDateTime } = useFormatDate()
   const [editing, setEditing] = useState(false)
   const [content, setContent] = useState(note.content)
 
@@ -52,7 +54,7 @@ function NoteItem({ note, leadId }: { note: Note; leadId: number }) {
             </div>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            {note.createdByUserName} · {new Date(note.createdAtUtc).toLocaleString()}
+            {note.createdByUserName} · {formatDateTime(note.createdAtUtc)}
             {note.updatedAtUtc && " (edited)"}
           </p>
         </>

@@ -12,10 +12,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "@/features/auth/AuthContext"
+import { useFormatDate } from "@/lib/use-format-date"
 import { useCreateUser, useUpdateUser, useUsers } from "./hooks"
 
 export function UsersPage() {
   const { user: currentUser } = useAuth()
+  const { formatDateTime } = useFormatDate()
   const isMasterAdmin = currentUser?.role === "MasterAdmin"
   const assignableRoles: ("Admin" | "Executive")[] = isMasterAdmin ? ["Admin", "Executive"] : ["Executive"]
 
@@ -158,7 +160,7 @@ export function UsersPage() {
                       <Badge variant="outline">{u.role}</Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {u.lastLoginAtUtc ? new Date(u.lastLoginAtUtc).toLocaleString() : "Never"}
+                      {u.lastLoginAtUtc ? formatDateTime(u.lastLoginAtUtc) : "Never"}
                     </TableCell>
                     <TableCell>
                       <Switch
