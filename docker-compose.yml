@@ -39,8 +39,12 @@ services:
       Cors__AllowedOrigins__0: ${FRONTEND_URL}
       Seed__MasterAdminEmail: ${SEED_MASTER_ADMIN_EMAIL}
       Seed__MasterAdminPassword: ${SEED_MASTER_ADMIN_PASSWORD}
-    ports:
-      - "8080:8080"
+    # No host port binding -- Coolify's Traefik proxy reaches the container over the
+    # internal Docker network via this exposed port and handles the public domain/TLS
+    # itself. Publishing straight to the host port (the old "8080:8080" here) collides
+    # with whatever else on the shared server already holds that port.
+    expose:
+      - "8080"
     volumes:
       - api-uploads:/app/App_Data/uploads
 

@@ -14,10 +14,10 @@ This is the fast path for testing SACRM on a real URL while it's still being bui
 cp .env.example .env
 # edit .env with real values
 docker compose up -d --build
-curl http://localhost:8080/api/health
+docker compose exec api curl -s http://localhost:8080/api/health
 ```
 
-The `api` service listens on `8080` internally and is published to the host at the same port for local testing. On the first `up`, the container runs migrations and seeds the Master Admin + starter lookups automatically (see "Startup migrations" below) — no separate `dotnet ef database update` step needed here, unlike the IIS path.
+The `api` service only `expose`s port `8080` on the compose-internal network (no host port binding — see the comment in `docker-compose.yml` for why: it's what caused the Coolify "port is already allocated" deploy failure the first time around, since publishing straight to a host port collides with whatever else is already using it on a shared server). That means `curl` from the host itself can't reach it directly; `docker compose exec` runs the check from inside the container's network instead. On the first `up`, the container runs migrations and seeds the Master Admin + starter lookups automatically (see "Startup migrations" below) — no separate `dotnet ef database update` step needed here, unlike the IIS path.
 
 ## Deploying on Coolify
 
